@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tassie — AI Secure Code Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg-0:#080a10;
+    --bg-1:#0d111a;
+    --bg-2:#131a26;
+    --glass:rgba(19,26,38,0.55);
+    --glass-border:rgba(120,180,200,0.14);
+    --accent:#4fe6d0;
+    --accent-dim:#2fa896;
+    --accent-soft:rgba(79,230,208,0.12);
+    --warn:#f5a623;
+    --danger:#ff5470;
+    --danger-soft:rgba(255,84,112,0.12);
+    --text-0:#eef3f6;
+    --text-1:#9fb0bd;
+    --text-2:#5f7080;
+    --mono:'JetBrains Mono', monospace;
+    --disp:'Space Grotesk', sans-serif;
+    --body:'Inter', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(79,230,208,0.08), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 10%, rgba(255,84,112,0.05), transparent 60%),
+      var(--bg-0);
+    color:var(--text-0);
+    font-family:var(--body);
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--accent-soft); color:var(--accent);}
+  a{color:inherit; text-decoration:none;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  /* ---------- cinematic page-load + scroll reveal ---------- */
+  #page-loader{
+    position:fixed; inset:0; z-index:999; background:var(--bg-0);
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .6s ease, visibility .6s ease;
+  }
+  #page-loader.hide{opacity:0; visibility:hidden;}
+  .loader-mark{
+    width:44px; height:44px; border-radius:12px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-dim));
+    box-shadow:0 0 40px rgba(79,230,208,0.5);
+    animation:loaderPulse 1.1s ease-in-out infinite;
+  }
+  @keyframes loaderPulse{0%,100%{transform:scale(1); opacity:1;} 50%{transform:scale(0.85); opacity:0.6;}}
+
+  .cinematic-in{opacity:0; transform:translateY(22px); animation:cinIn .8s cubic-bezier(.2,.7,.2,1) forwards;}
+  @keyframes cinIn{to{opacity:1; transform:translateY(0);}}
+
+  .reveal{opacity:0; transform:translateY(28px); transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 48px;
+    backdrop-filter:blur(16px);
+    background:rgba(8,10,16,0.6);
+    border-bottom:1px solid var(--glass-border);
+  }
+  .logo{display:flex; align-items:center; gap:10px; font-family:var(--disp); font-weight:700; font-size:19px; letter-spacing:0.3px;}
+  .logo-mark{
+    width:26px; height:26px; border-radius:7px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-dim));
+    position:relative;
+    box-shadow:0 0 18px rgba(79,230,208,0.5);
+  }
+  .logo-mark::after{
+    content:''; position:absolute; inset:6px;
+    border:1.5px solid var(--bg-0); border-radius:3px;
+  }
+  .nav-links{display:flex; gap:36px; font-size:14.5px; color:var(--text-1);}
+  .nav-links a:hover{color:var(--text-0);}
+  .nav-cta{display:flex; gap:14px; align-items:center;}
+  .btn{
+    font-family:var(--body); font-size:14px; font-weight:600;
+    padding:10px 20px; border-radius:9px; cursor:pointer; border:none;
+    transition:all .2s ease;
+  }
+  .btn-ghost{background:transparent; color:var(--text-1); border:1px solid var(--glass-border);}
+  .btn-ghost:hover{color:var(--text-0); border-color:rgba(255,255,255,0.25);}
+  .btn-primary{
+    background:linear-gradient(135deg, var(--accent), var(--accent-dim));
+    color:#04211c; box-shadow:0 4px 20px rgba(79,230,208,0.25);
+  }
+  .btn-primary:hover{transform:translateY(-1px); box-shadow:0 6px 26px rgba(79,230,208,0.4);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:170px 48px 90px;
+    max-width:1280px; margin:0 auto;
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:60px; align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:12px; color:var(--accent);
+    background:var(--accent-soft); border:1px solid rgba(79,230,208,0.25);
+    padding:6px 12px; border-radius:20px; margin-bottom:22px;
+  }
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+  h1{
+    font-family:var(--disp); font-weight:700;
+    font-size:clamp(34px,4.4vw,56px); line-height:1.08; letter-spacing:-1px;
+    margin-bottom:22px;
+  }
+  h1 .grad{
+    background:linear-gradient(135deg, var(--accent) 10%, #8fe3ff 60%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{font-size:17px; line-height:1.65; color:var(--text-1); max-width:480px; margin-bottom:34px;}
+  .hero-actions{display:flex; gap:14px; margin-bottom:38px;}
+  .hero-actions .btn{padding:13px 26px; font-size:15px;}
+  .trust-row{display:flex; gap:28px; color:var(--text-2); font-size:13px; font-family:var(--mono);}
+  .trust-row span{display:flex; align-items:center; gap:6px;}
+
+  /* ---------- SCAN VISUAL (signature element) ---------- */
+  .scan-card{
+    position:relative;
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    border-radius:16px;
+    backdrop-filter:blur(20px);
+    overflow:hidden;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,0.6);
+  }
+  .scan-card-head{
+    display:flex; align-items:center; gap:8px;
+    padding:12px 16px; border-bottom:1px solid var(--glass-border);
+    background:rgba(255,255,255,0.02);
+  }
+  .scan-dot{width:9px; height:9px; border-radius:50%;}
+  .scan-card-head .scan-dot:nth-child(1){background:#ff5f57;}
+  .scan-card-head .scan-dot:nth-child(2){background:#febc2e;}
+  .scan-card-head .scan-dot:nth-child(3){background:#28c840;}
+  .scan-card-head span{margin-left:10px; font-family:var(--mono); font-size:12px; color:var(--text-2);}
+  .code-area{position:relative; padding:22px 22px 26px; font-family:var(--mono); font-size:13px; line-height:2;}
+  .code-area .ln{color:var(--text-2); display:inline-block; width:22px;}
+  .code-area .kw{color:#c792ea;} .code-area .str{color:#c3e88d;} .code-area .fn{color:#82aaff;} .code-area .cm{color:var(--text-2);}
+  .flag-line{
+    position:relative; border-radius:6px; padding:1px 6px; margin:0 -6px;
+    transition:background .3s ease;
+  }
+  .flag-line.hit{
+    background:var(--danger-soft);
+    box-shadow:inset 0 0 0 1px rgba(255,84,112,0.35);
+  }
+  .flag-tag{
+    display:none; position:absolute; right:0; top:-2px;
+    font-size:10.5px; font-family:var(--body); font-weight:600;
+    color:var(--danger); background:rgba(255,84,112,0.15);
+    padding:2px 8px; border-radius:20px; letter-spacing:0.3px;
+  }
+  .flag-line.hit .flag-tag{display:inline-block; animation:tagIn .3s ease;}
+  @keyframes tagIn{from{opacity:0; transform:translateX(6px);} to{opacity:1; transform:translateX(0);}}
+  .scan-beam{
+    position:absolute; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow:0 0 16px 2px rgba(79,230,208,0.6);
+    animation:sweep 3.4s cubic-bezier(.6,0,.4,1) infinite;
+    top:22px;
+  }
+  @keyframes sweep{
+    0%{top:22px; opacity:0;}
+    5%{opacity:1;}
+    92%{opacity:1;}
+    100%{top:96%; opacity:0;}
+  }
+  .scan-footer{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 20px; border-top:1px solid var(--glass-border);
+    font-family:var(--mono); font-size:11.5px; color:var(--text-2);
+    background:rgba(255,255,255,0.02);
+  }
+  .scan-footer .risk{color:var(--danger); font-weight:600;}
+
+  /* ---------- FEATURES ---------- */
+  .section{max-width:1280px; margin:0 auto; padding:90px 48px;}
+  .section-head{max-width:600px; margin-bottom:56px;}
+  .section-label{font-family:var(--mono); font-size:12px; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-bottom:12px; display:block;}
+  .section-head h2{font-family:var(--disp); font-size:clamp(26px,3vw,38px); font-weight:600; letter-spacing:-0.5px; line-height:1.2;}
+  .section-head p{color:var(--text-1); margin-top:14px; font-size:15.5px; line-height:1.6;}
+  .feature-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .feature-card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:14px;
+    padding:26px; backdrop-filter:blur(14px); transition:transform .25s ease, border-color .25s ease;
+  }
+  .feature-card:hover{transform:translateY(-4px); border-color:rgba(79,230,208,0.3);}
+  .feature-icon{
+    width:38px; height:38px; border-radius:9px; margin-bottom:16px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--accent-soft); color:var(--accent); font-size:17px;
+  }
+  .feature-card h3{font-family:var(--disp); font-size:16.5px; margin-bottom:8px; font-weight:600;}
+  .feature-card p{color:var(--text-1); font-size:13.8px; line-height:1.55;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .flow{display:flex; flex-direction:column; gap:0;}
+  .flow-step{
+    display:grid; grid-template-columns:70px 1fr; gap:24px;
+    padding:26px 0; border-top:1px solid var(--glass-border);
+  }
+  .flow-step:last-child{border-bottom:1px solid var(--glass-border);}
+  .flow-num{font-family:var(--mono); color:var(--text-2); font-size:13px; padding-top:2px;}
+  .flow-body h4{font-family:var(--disp); font-size:16px; margin-bottom:6px; font-weight:600;}
+  .flow-body p{color:var(--text-1); font-size:14px; max-width:560px; line-height:1.6;}
+
+  /* ---------- CTA ---------- */
+  .cta-band{
+    max-width:1280px; margin:20px auto 100px; padding:60px 48px;
+    background:linear-gradient(135deg, rgba(79,230,208,0.08), rgba(79,230,208,0.02));
+    border:1px solid rgba(79,230,208,0.2); border-radius:20px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px;
+  }
+  .cta-band h3{font-family:var(--disp); font-size:24px; font-weight:600; margin-bottom:8px;}
+  .cta-band p{color:var(--text-1); font-size:14.5px;}
+
+  footer{border-top:1px solid var(--glass-border); padding:36px 48px; text-align:center; color:var(--text-2); font-size:13px;}
+
+  /* ================= APP (dashboard) ================= */
+  #app-view{display:none; min-height:100vh;}
+  .app-shell{display:grid; grid-template-columns:240px 1fr; min-height:100vh;}
+  .sidebar{
+    background:var(--bg-1); border-right:1px solid var(--glass-border);
+    padding:24px 16px; display:flex; flex-direction:column; gap:4px;
+  }
+  .sidebar .logo{padding:0 10px 26px;}
+  .side-link{
+    display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:9px;
+    color:var(--text-1); font-size:14px; cursor:pointer; transition:all .15s ease;
+  }
+  .side-link:hover{background:rgba(255,255,255,0.04); color:var(--text-0);}
+  .side-link.active{background:var(--accent-soft); color:var(--accent); font-weight:600;}
+  .side-icon{width:17px; text-align:center;}
+  .sidebar-foot{margin-top:auto; padding-top:16px; border-top:1px solid var(--glass-border);}
+  .user-chip{display:flex; align-items:center; gap:10px; padding:8px 10px;}
+  .avatar{width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,var(--accent),#8fe3ff); flex-shrink:0;}
+  .user-chip .meta{font-size:12.5px; line-height:1.3;}
+  .user-chip .meta .name{color:var(--text-0); font-weight:600;}
+  .user-chip .meta .role{color:var(--text-2);}
+
+  .main-area{padding:26px 34px 60px; max-width:1400px;}
+  .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;}
+  .topbar h1{font-family:var(--disp); font-size:24px; font-weight:600;}
+  .topbar-actions{display:flex; gap:12px; align-items:center;}
+  .icon-btn{
+    width:38px; height:38px; border-radius:9px; background:var(--glass); border:1px solid var(--glass-border);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; color:var(--text-1);
+    transition:all .15s ease;
+  }
+  .icon-btn:hover{color:var(--text-0); border-color:rgba(255,255,255,0.2);}
+  .badge-dot{position:absolute; top:6px; right:7px; width:7px; height:7px; border-radius:50%; background:var(--danger); box-shadow:0 0 0 2px var(--bg-0);}
+
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:26px;}
+  .stat-card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; padding:20px;
+    backdrop-filter:blur(14px);
+  }
+  .stat-top{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;}
+  .stat-label{color:var(--text-2); font-size:12.5px; font-family:var(--mono);}
+  .stat-value{font-family:var(--disp); font-size:28px; font-weight:700;}
+  .stat-delta{font-size:12px; font-weight:600; padding:3px 8px; border-radius:20px;}
+  .stat-delta.up{color:var(--danger); background:var(--danger-soft);}
+  .stat-delta.down{color:var(--accent); background:var(--accent-soft);}
+
+  .grid-2{display:grid; grid-template-columns:1.4fr 1fr; gap:18px; margin-bottom:22px;}
+  .panel{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; padding:22px;
+    backdrop-filter:blur(14px);
+  }
+  .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .panel-head h3{font-family:var(--disp); font-size:15.5px; font-weight:600;}
+  .panel-head .sub{color:var(--text-2); font-size:12px; font-family:var(--mono);}
+
+  .dropzone{
+    border:1.5px dashed var(--glass-border); border-radius:12px; padding:36px 20px;
+    text-align:center; cursor:pointer; transition:all .2s ease; margin-bottom:16px;
+  }
+  .dropzone:hover, .dropzone.drag{border-color:var(--accent); background:var(--accent-soft);}
+  .dropzone .dz-icon{font-size:26px; margin-bottom:10px; color:var(--accent);}
+  .dropzone .dz-title{font-weight:600; font-size:14.5px; margin-bottom:4px;}
+  .dropzone .dz-sub{color:var(--text-2); font-size:12.5px;}
+  #fileInput{display:none;}
+
+  .severity-list{display:flex; flex-direction:column; gap:10px;}
+  .sev-row{display:flex; align-items:center; gap:12px; font-size:13.5px;}
+  .sev-bar-bg{flex:1; height:6px; border-radius:6px; background:rgba(255,255,255,0.06); overflow:hidden;}
+  .sev-bar{height:100%; border-radius:6px; transition:width 1.2s cubic-bezier(.2,.8,.2,1);}
+  .sev-name{width:70px; color:var(--text-1);}
+  .sev-count{width:26px; text-align:right; font-family:var(--mono); color:var(--text-1);}
+
+  .history-table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .history-table th{text-align:left; color:var(--text-2); font-weight:500; font-size:12px; padding:8px 10px; border-bottom:1px solid var(--glass-border); font-family:var(--mono);}
+  .history-table td{padding:12px 10px; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-1);}
+  .history-table tr:hover td{background:rgba(255,255,255,0.02);}
+  .file-cell{display:flex; align-items:center; gap:9px; color:var(--text-0); font-family:var(--mono); font-size:12.8px;}
+  .status-pill{font-size:11.5px; font-weight:600; padding:4px 10px; border-radius:20px;}
+  .status-pill.clean{color:var(--accent); background:var(--accent-soft);}
+  .status-pill.risk{color:var(--danger); background:var(--danger-soft);}
+  .status-pill.warn{color:var(--warn); background:rgba(245,166,35,0.12);}
+  .row-actions{display:flex; gap:8px;}
+  .row-actions button{
+    background:transparent; border:1px solid var(--glass-border); color:var(--text-1);
+    border-radius:7px; padding:5px 10px; font-size:11.5px; cursor:pointer; font-family:var(--body);
+  }
+  .row-actions button:hover{border-color:var(--accent); color:var(--accent);}
+
+  /* AI explanation typing panel */
+  .ai-panel{margin-top:6px;}
+  .ai-msg{
+    background:rgba(79,230,208,0.05); border:1px solid rgba(79,230,208,0.18);
+    border-radius:12px; padding:16px; font-size:13.5px; line-height:1.65; color:var(--text-0);
+    font-family:var(--body); position:relative; min-height:70px;
+  }
+  .ai-msg .cursor{display:inline-block; width:7px; height:15px; background:var(--accent); margin-left:2px; vertical-align:middle; animation:blink 0.9s infinite;}
+  @keyframes blink{0%,49%{opacity:1;} 50%,100%{opacity:0;}}
+  .ai-label{display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11.5px; color:var(--accent); margin-bottom:10px;}
+  .ai-label .pulse-dot{width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 8px var(--accent); animation:pulse 1.4s infinite;}
+
+  .progress-wrap{margin:14px 0;}
+  .progress-track{height:8px; border-radius:6px; background:rgba(255,255,255,0.06); overflow:hidden;}
+  .progress-fill{height:100%; border-radius:6px; background:linear-gradient(90deg,var(--accent),#8fe3ff); width:0%; transition:width .4s ease;}
+  .progress-label{display:flex; justify-content:space-between; font-size:12px; color:var(--text-2); margin-top:6px; font-family:var(--mono);}
+
+  .export-row{display:flex; gap:10px; margin-top:16px;}
+  .export-row button{flex:1;}
+
+  /* Toast notifications */
+  #toast-stack{position:fixed; bottom:24px; right:24px; z-index:999; display:flex; flex-direction:column; gap:10px;}
+  .toast{
+    background:var(--bg-2); border:1px solid var(--glass-border); border-left:3px solid var(--accent);
+    border-radius:10px; padding:13px 16px; min-width:280px; font-size:13.5px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.4);
+    animation:toastIn .35s ease;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .toast.danger{border-left-color:var(--danger);}
+  @keyframes toastIn{from{opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);}}
+  .toast .t-title{font-weight:600; margin-bottom:2px;}
+  .toast .t-sub{color:var(--text-2); font-size:12px;}
+
+  /* ---------- LOGIN ---------- */
+  #login-view{display:none; min-height:100vh; align-items:center; justify-content:center; position:relative;}
+  .login-card{
+    width:400px; background:var(--glass); border:1px solid var(--glass-border); border-radius:18px;
+    padding:38px 34px; backdrop-filter:blur(24px); box-shadow:0 30px 90px -20px rgba(0,0,0,0.7);
+  }
+  .login-card .logo{justify-content:center; margin-bottom:8px;}
+  .login-sub{text-align:center; color:var(--text-2); font-size:13.5px; margin-bottom:28px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block; font-size:12.5px; color:var(--text-1); margin-bottom:7px; font-family:var(--mono);}
+  .field input{
+    width:100%; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border);
+    border-radius:9px; padding:11px 13px; color:var(--text-0); font-size:14px; font-family:var(--body);
+    outline:none; transition:border-color .2s ease;
+  }
+  .field input:focus{border-color:var(--accent);}
+  .login-card .btn-primary{width:100%; padding:12px; margin-top:6px; font-size:14.5px;}
+  .login-foot{text-align:center; margin-top:20px; font-size:12.5px; color:var(--text-2);}
+  .role-toggle{display:flex; gap:8px; margin-bottom:20px;}
+  .role-toggle button{
+    flex:1; padding:8px; border-radius:8px; border:1px solid var(--glass-border); background:transparent;
+    color:var(--text-2); font-size:12px; cursor:pointer; font-family:var(--mono);
+  }
+  .role-toggle button.active{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
+
+  /* ---------- view switching ---------- */
+  .view-section{display:none; animation:viewIn .35s ease;}
+  .view-section.active{display:block;}
+  @keyframes viewIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  /* ---------- notifications dropdown ---------- */
+  .notif-wrap{position:relative;}
+  .notif-panel{
+    display:none; position:absolute; top:48px; right:0; width:320px; max-height:360px; overflow-y:auto;
+    background:var(--bg-1); border:1px solid var(--glass-border); border-radius:12px; padding:8px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.5); z-index:80;
+  }
+  .notif-panel.open{display:block; animation:viewIn .2s ease;}
+  .notif-item{padding:11px 12px; border-radius:9px; font-size:12.8px; cursor:pointer;}
+  .notif-item:hover{background:rgba(255,255,255,0.04);}
+  .notif-item .n-top{display:flex; justify-content:space-between; color:var(--text-0); font-weight:600; margin-bottom:3px;}
+  .notif-item .n-sub{color:var(--text-2); font-size:11.5px;}
+  .notif-empty{padding:20px 12px; text-align:center; color:var(--text-2); font-size:12.5px;}
+
+  /* ---------- scan page: paste-code tabs ---------- */
+  .scan-tabs{display:flex; gap:8px; margin-bottom:16px;}
+  .scan-tabs button{
+    padding:8px 14px; border-radius:8px; border:1px solid var(--glass-border); background:transparent;
+    color:var(--text-2); font-size:12.5px; cursor:pointer; font-family:var(--mono);
+  }
+  .scan-tabs button.active{border-color:var(--accent); color:var(--accent); background:var(--accent-soft);}
+  .code-input{
+    width:100%; min-height:180px; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border);
+    border-radius:10px; padding:14px; color:var(--text-0); font-family:var(--mono); font-size:12.8px;
+    resize:vertical; outline:none; margin-bottom:12px;
+  }
+  .code-input:focus{border-color:var(--accent);}
+
+  /* ---------- search bar ---------- */
+  .search-row{display:flex; gap:10px; margin-bottom:16px;}
+  .search-row input{
+    flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:9px;
+    padding:10px 13px; color:var(--text-0); font-size:13px; font-family:var(--body); outline:none;
+  }
+  .search-row input:focus{border-color:var(--accent);}
+  .search-row select{
+    background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:9px;
+    padding:10px 13px; color:var(--text-1); font-size:13px; font-family:var(--body); outline:none;
+  }
+
+  /* ---------- report cards ---------- */
+  .report-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px;}
+  .report-card{
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:13px; padding:18px;
+    backdrop-filter:blur(14px); transition:border-color .15s ease;
+  }
+  .report-card:hover{border-color:rgba(120,180,200,0.3);}
+  .report-card .rc-file{font-family:var(--mono); font-size:13px; color:var(--text-0); font-weight:600; margin-bottom:4px; word-break:break-all;}
+  .report-card .rc-date{color:var(--text-2); font-size:11.5px; margin-bottom:12px;}
+  .report-card .rc-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .report-card .rc-actions{display:flex; gap:8px;}
+  .report-card .rc-actions button{flex:1;}
+
+  /* ---------- settings ---------- */
+  .settings-block{max-width:560px;}
+  .settings-row{
+    display:flex; justify-content:space-between; align-items:center; padding:16px 0;
+    border-bottom:1px solid var(--glass-border);
+  }
+  .settings-row:last-child{border-bottom:none;}
+  .settings-row .s-label{font-size:14px; color:var(--text-0); font-weight:500; margin-bottom:3px;}
+  .settings-row .s-sub{font-size:12px; color:var(--text-2);}
+  .switch{
+    position:relative; width:42px; height:24px; border-radius:20px; background:rgba(255,255,255,0.1);
+    border:1px solid var(--glass-border); cursor:pointer; transition:background .2s ease; flex-shrink:0;
+  }
+  .switch.on{background:var(--accent-dim); border-color:var(--accent);}
+  .switch .knob{
+    position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%;
+    background:#fff; transition:left .2s ease;
+  }
+  .switch.on .knob{left:20px;}
+  .settings-input-row{display:flex; gap:10px; margin-top:8px;}
+  .settings-input-row input{
+    flex:1; background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:9px;
+    padding:10px 13px; color:var(--text-0); font-size:13px; font-family:var(--mono); outline:none;
+  }
+  .conn-dot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:var(--text-2);}
+  .conn-dot.ok{background:var(--accent); box-shadow:0 0 6px var(--accent);}
+  .conn-dot.fail{background:var(--danger); box-shadow:0 0 6px var(--danger);}
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; z-index:900;
+    background:rgba(3,6,10,0.6); backdrop-filter:blur(4px);
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal-card{
+    width:100%; max-width:680px; max-height:80vh; overflow-y:auto;
+    background:var(--bg-1); border:1px solid var(--glass-border);
+    border-radius:14px; padding:22px; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid var(--glass-border);
+  }
+  .modal-head h3{font-family:var(--disp); font-size:17px;}
+  .modal-body{font-size:13.5px;}
+  .finding-card{
+    background:rgba(255,255,255,0.02); border:1px solid var(--glass-border); border-radius:11px;
+    padding:14px; margin-bottom:10px;
+  }
+  .finding-card.resolved{opacity:0.5;}
+  .finding-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:10px;}
+  .finding-top .f-meta{font-family:var(--mono); font-size:11.5px; color:var(--text-2);}
+  .finding-explain{color:var(--text-1); line-height:1.55; margin:8px 0;}
+  .resolve-btn{
+    background:transparent; border:1px solid var(--glass-border); color:var(--text-1);
+    border-radius:7px; padding:5px 11px; font-size:11.5px; cursor:pointer; white-space:nowrap;
+  }
+  .resolve-btn.is-resolved{border-color:var(--accent); color:var(--accent);}
+
+  /* light mode override */
+  body.light{
+    --bg-0:#f4f6f8; --bg-1:#ffffff; --bg-2:#f0f2f5;
+    --glass:rgba(255,255,255,0.7); --glass-border:rgba(20,30,40,0.1);
+    --text-0:#12181f; --text-1:#4a5866; --text-2:#8b98a4;
+  }
+  body.light nav{background:rgba(244,246,248,0.75);}
+
+  @media (max-width:980px){
+    .hero{grid-template-columns:1fr; padding-top:130px;}
+    .feature-grid{grid-template-columns:1fr;}
+    .grid-2{grid-template-columns:1fr;}
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .nav-links{display:none;}
+    .app-shell{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<div id="page-loader"><div class="loader-mark"></div></div>
+
+<!-- ================= LANDING ================= -->
+<div id="landing-view">
+<nav>
+  <div class="logo"><div class="logo-mark"></div>Tassie</div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how">How it works</a>
+    <a href="#cta">Pricing</a>
+  </div>
+  <div class="nav-cta">
+    <button class="btn btn-ghost" onclick="showLogin()">Log in</button>
+    <button class="btn btn-primary" onclick="showLogin()">Start scanning</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div>
+    <div class="eyebrow cinematic-in" style="animation-delay:.05s"><span class="dot"></span> Real-time secure code analysis</div>
+    <h1 class="cinematic-in" style="animation-delay:.15s">Catch vulnerabilities <span class="grad">while you type</span>, not after you ship.</h1>
+    <p class="hero-sub cinematic-in" style="animation-delay:.28s">Tassie reads your code as it's written, flags security and quality issues instantly, and explains exactly how to fix them — before a single line reaches production.</p>
+    <div class="hero-actions cinematic-in" style="animation-delay:.4s">
+      <button class="btn btn-primary" onclick="showLogin()">Start free scan</button>
+      <button class="btn btn-ghost" onclick="document.getElementById('how').scrollIntoView()">See how it works</button>
+    </div>
+    <div class="trust-row cinematic-in" style="animation-delay:.52s">
+      <span>⚡ Sub-second analysis</span>
+      <span>🔒 SOC2-ready workflow</span>
+      <span>🧩 CI/CD & IDE integration</span>
+    </div>
+  </div>
+
+  <div class="scan-card cinematic-in" style="animation-delay:.35s">
+    <div class="scan-card-head"><div class="scan-dot"></div><div class="scan-dot"></div><div class="scan-dot"></div><span>auth_service.py — scanning…</span></div>
+    <div class="code-area">
+      <div class="scan-beam"></div>
+      <div><span class="ln">01</span><span class="kw">import</span> sqlite3</div>
+      <div><span class="ln">02</span></div>
+      <div><span class="ln">03</span><span class="kw">def</span> <span class="fn">get_user</span>(username):</div>
+      <div class="flag-line" id="fl1"><span class="ln">04</span>&nbsp;&nbsp;query = <span class="str">"SELECT * FROM users WHERE name='"</span> + username + <span class="str">"'"</span><span class="flag-tag">SQL INJECTION</span></div>
+      <div><span class="ln">05</span>&nbsp;&nbsp;<span class="kw">return</span> db.execute(query)</div>
+      <div><span class="ln">06</span></div>
+      <div class="flag-line" id="fl2"><span class="ln">07</span>API_KEY = <span class="str">"sk_live_4f9a212bc..."</span><span class="flag-tag">HARDCODED SECRET</span></div>
+      <div><span class="ln">08</span><span class="cm"># TODO: rotate before launch</span></div>
+    </div>
+    <div class="scan-footer"><span>2 files analyzed · 1.2s</span><span class="risk">2 critical issues found</span></div>
+  </div>
+</section>
+
+<section class="section" id="features">
+  <div class="section-head reveal">
+    <span class="section-label">Platform</span>
+    <h2>Everything a security-first engineering team needs</h2>
+    <p>One continuous layer across writing, reviewing, and shipping code — so risk gets caught at the cheapest possible moment: the moment it's written.</p>
+  </div>
+  <div class="feature-grid">
+    <div class="feature-card reveal"><div class="feature-icon">◎</div><h3>Real-time scanning</h3><p>Analyzes code continuously as it's typed, powered by Semgrep, Bandit and ESLint under the hood.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">✦</div><h3>AI explanations</h3><p>Every finding comes with a plain-English breakdown of the risk and why it matters — no jargon.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">⇄</div><h3>Suggested fixes</h3><p>One-click secure code suggestions generated in context, ready to accept or edit.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">▤</div><h3>Risk scoring</h3><p>Every file and repo gets a live risk score so teams know what to prioritize first.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">▥</div><h3>Analytics dashboard</h3><p>Track vulnerability trends, resolution time, and team-wide security posture over time.</p></div>
+    <div class="feature-card reveal"><div class="feature-icon">⛃</div><h3>Audit-ready reports</h3><p>Export polished PDF or Excel reports for compliance reviews and stakeholder updates.</p></div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="section-head reveal">
+    <span class="section-label">Workflow</span>
+    <h2>From keystroke to secure commit</h2>
+  </div>
+  <div class="flow">
+    <div class="flow-step reveal"><div class="flow-num">01</div><div class="flow-body"><h4>Write code, anywhere</h4><p>Paste a snippet, drop a file, or connect a repo — Tassie works the same across all of them.</p></div></div>
+    <div class="flow-step reveal"><div class="flow-num">02</div><div class="flow-body"><h4>Tassie scans continuously</h4><p>Static analysis engines run in the background and flag issues the moment they appear.</p></div></div>
+    <div class="flow-step reveal"><div class="flow-num">03</div><div class="flow-body"><h4>AI explains the "why"</h4><p>Each finding is translated into a clear explanation of impact, severity, and root cause.</p></div></div>
+    <div class="flow-step reveal"><div class="flow-num">04</div><div class="flow-body"><h4>You review and fix</h4><p>Accept the suggested patch or write your own — Tassie re-checks instantly either way.</p></div></div>
+  </div>
+</section>
+
+<div class="cta-band reveal" id="cta">
+  <div><h3>Start catching issues before they ship.</h3><p>No setup required — scan your first file in under a minute.</p></div>
+  <button class="btn btn-primary" onclick="showLogin()">Start free scan</button>
+</div>
+
+<footer>© 2026 Tassie. Built as a demonstration of AI-assisted secure engineering.</footer>
+</div>
+
+<!-- ================= LOGIN ================= -->
+<div id="login-view">
+  <div class="login-card">
+    <div class="logo"><div class="logo-mark"></div>Tassie</div>
+    <p class="login-sub">Sign in to your workspace</p>
+    <div class="role-toggle">
+      <button class="active" onclick="setRole(this,'Developer')">Developer</button>
+      <button onclick="setRole(this,'Security Lead')">Security Lead</button>
+      <button onclick="setRole(this,'Admin')">Admin</button>
+    </div>
+    <div class="field"><label>EMAIL</label><input type="email" placeholder="you@company.com" value="dev@guardian.ai"></div>
+    <div class="field"><label>PASSWORD</label><input type="password" placeholder="••••••••" value="••••••••"></div>
+    <button class="btn btn-primary" onclick="enterApp()">Sign in</button>
+    <p class="login-foot">Demo mode — any credentials will work.</p>
+  </div>
+</div>
+
+<!-- ================= APP / DASHBOARD ================= -->
+<div id="app-view">
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="logo"><div class="logo-mark"></div>Tassie</div>
+    <div class="side-link active" data-view="overview" onclick="switchView('overview',this)"><span class="side-icon">▥</span> Overview</div>
+    <div class="side-link" data-view="scan" onclick="switchView('scan',this)"><span class="side-icon">◎</span> Scan code</div>
+    <div class="side-link" data-view="reports" onclick="switchView('reports',this)"><span class="side-icon">▤</span> Reports</div>
+    <div class="side-link" data-view="history" onclick="switchView('history',this)"><span class="side-icon">⏱</span> History</div>
+    <div class="side-link" data-view="settings" onclick="switchView('settings',this)"><span class="side-icon">⚙</span> Settings</div>
+    <div class="sidebar-foot">
+      <div class="user-chip"><div class="avatar"></div><div class="meta"><div class="name" id="userName">Dev Account</div><div class="role" id="userRole">Developer</div></div></div>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <div class="topbar">
+      <h1 id="viewTitle">Overview</h1>
+      <div class="topbar-actions">
+        <div class="icon-btn" onclick="toggleTheme()">◐</div>
+        <div class="notif-wrap">
+          <div class="icon-btn" id="notifBell" onclick="toggleNotifPanel(event)">🔔<span class="badge-dot" id="notifDot" style="display:none;"></span></div>
+          <div class="notif-panel" id="notifPanel"></div>
+        </div>
+        <button class="btn btn-ghost" onclick="backToLanding()">Log out</button>
+      </div>
+    </div>
+
+    <!-- ---------------- OVERVIEW ---------------- -->
+    <section class="view-section active" id="view-overview">
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">FILES SCANNED</span></div><div class="stat-value" id="statScans">0</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">OPEN ISSUES</span></div><div class="stat-value" id="statOpen">0</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">AVG RISK SCORE</span></div><div class="stat-value" id="statRisk">0</div></div>
+        <div class="stat-card"><div class="stat-top"><span class="stat-label">RESOLVED (30d)</span></div><div class="stat-value" id="statResolved">0</div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>Vulnerability trend</h3><span class="sub">LAST 14 DAYS</span></div>
+          <canvas id="trendChart" height="110"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Issues by severity</h3><span class="sub">OPEN, LIVE</span></div>
+          <div class="severity-list" id="severityList">
+            <div class="sev-row"><span class="sev-name">Critical</span><div class="sev-bar-bg"><div class="sev-bar" id="bar-critical" style="width:0%;background:var(--danger)"></div></div><span class="sev-count" id="cnt-critical">0</span></div>
+            <div class="sev-row"><span class="sev-name">High</span><div class="sev-bar-bg"><div class="sev-bar" id="bar-high" style="width:0%;background:var(--warn)"></div></div><span class="sev-count" id="cnt-high">0</span></div>
+            <div class="sev-row"><span class="sev-name">Medium</span><div class="sev-bar-bg"><div class="sev-bar" id="bar-medium" style="width:0%;background:#8fe3ff"></div></div><span class="sev-count" id="cnt-medium">0</span></div>
+            <div class="sev-row"><span class="sev-name">Low</span><div class="sev-bar-bg"><div class="sev-bar" id="bar-low" style="width:0%;background:var(--accent)"></div></div><span class="sev-count" id="cnt-low">0</span></div>
+          </div>
+          <div style="margin-top:22px;">
+            <canvas id="donutChart" height="140"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Recent activity</h3><span class="sub">LAST 5 SCANS</span></div>
+        <table class="history-table">
+          <thead><tr><th>File</th><th>Risk</th><th>Status</th><th></th></tr></thead>
+          <tbody id="recentActivityBody">
+            <tr><td colspan="4" style="color:var(--text-2); text-align:center; padding:22px;">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------------- SCAN CODE ---------------- -->
+    <section class="view-section" id="view-scan">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head"><h3>Scan your code</h3><span class="sub">FILE OR PASTE</span></div>
+          <div class="scan-tabs">
+            <button class="active" id="tabFile" onclick="setScanTab('file')">Drop file</button>
+            <button id="tabPaste" onclick="setScanTab('paste')">Paste code</button>
+          </div>
+
+          <div id="scanFilePane">
+            <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+              <div class="dz-icon">⇪</div>
+              <div class="dz-title">Drop a code file here, or click to browse</div>
+              <div class="dz-sub">.py .js .ts .java .go — up to 5MB</div>
+            </div>
+            <input type="file" id="fileInput">
+          </div>
+
+          <div id="scanPastePane" style="display:none;">
+            <input type="text" id="pasteFilename" placeholder="filename.py" class="code-input" style="min-height:auto; margin-bottom:10px;">
+            <textarea id="pasteCode" class="code-input" placeholder="Paste your code here…"></textarea>
+            <button class="btn btn-primary" style="width:100%;" onclick="scanPastedCode()">Scan pasted code</button>
+          </div>
+
+          <div class="progress-wrap" id="progressWrap" style="display:none;">
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label"><span id="progressText">Analyzing…</span><span id="progressPct">0%</span></div>
+          </div>
+          <div class="ai-panel" id="aiPanel" style="display:none;">
+            <div class="ai-label"><span class="pulse-dot"></span> AI EXPLANATION</div>
+            <div class="ai-msg" id="aiMsg"></div>
+            <div class="export-row">
+              <button class="btn btn-ghost" onclick="exportReport('pdf')">Export PDF</button>
+              <button class="btn btn-ghost" onclick="exportReport('excel')">Export Excel</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>What gets checked</h3><span class="sub">RULE ENGINE</span></div>
+          <div class="severity-list" style="gap:14px;">
+            <div class="sev-row" style="font-size:13px;"><span style="color:var(--text-0);">🔓 Hardcoded secrets & API keys</span></div>
+            <div class="sev-row" style="font-size:13px;"><span style="color:var(--text-0);">🧬 SQL injection patterns</span></div>
+            <div class="sev-row" style="font-size:13px;"><span style="color:var(--text-0);">🕸️ Cross-site scripting (XSS)</span></div>
+            <div class="sev-row" style="font-size:13px;"><span style="color:var(--text-0);">🔑 Weak crypto (MD5 / SHA1)</span></div>
+            <div class="sev-row" style="font-size:13px;"><span style="color:var(--text-0);">⚠️ Unsafe eval() / deserialization</span></div>
+            <div class="sev-row" style="font-size:13px;"><span style="color:var(--text-0);">🐛 Debug mode left on</span></div>
+          </div>
+          <p style="color:var(--text-2); font-size:12px; margin-top:16px; line-height:1.6;">Each finding is matched against a secure-coding guideline (RAG retrieval) and explained in plain English by the AI layer.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- REPORTS ---------------- -->
+    <section class="view-section" id="view-reports">
+      <div class="panel" style="margin-bottom:18px;">
+        <div class="panel-head"><h3>Report library</h3><span class="sub" id="reportsCount">0 SCANS</span></div>
+        <div class="report-grid" id="reportGrid">
+          <div style="color:var(--text-2); padding:20px;">Loading reports…</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------- HISTORY ---------------- -->
+    <section class="view-section" id="view-history">
+      <div class="panel">
+        <div class="panel-head"><h3>Scan history</h3><span class="sub">FULL AUDIT LOG</span></div>
+        <div class="search-row">
+          <input type="text" id="historySearch" placeholder="Search by filename…" oninput="renderHistoryTable()">
+          <select id="historyFilter" onchange="renderHistoryTable()">
+            <option value="all">All</option>
+            <option value="clean">Clean</option>
+            <option value="risk">Has issues</option>
+          </select>
+        </div>
+        <table class="history-table">
+          <thead><tr><th>File</th><th>Risk</th><th>Status</th><th>Date</th><th></th></tr></thead>
+          <tbody id="historyTableBody">
+            <tr><td colspan="5" style="color:var(--text-2); text-align:center; padding:24px;">Loading scan history…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---------------- SETTINGS ---------------- -->
+    <section class="view-section" id="view-settings">
+      <div class="panel settings-block">
+        <div class="panel-head"><h3>Account</h3></div>
+        <div class="settings-row">
+          <div><div class="s-label" id="settingsName">Dev Account</div><div class="s-sub" id="settingsEmail">dev@guardian.ai</div></div>
+          <span class="status-pill clean" id="settingsRole">Developer</span>
+        </div>
+      </div>
+
+      <div class="panel settings-block" style="margin-top:16px;">
+        <div class="panel-head"><h3>Preferences</h3></div>
+        <div class="settings-row">
+          <div><div class="s-label">Dark theme</div><div class="s-sub">Switch between dark and light mode</div></div>
+          <div class="switch on" id="themeSwitch" onclick="toggleTheme()"><div class="knob"></div></div>
+        </div>
+        <div class="settings-row">
+          <div><div class="s-label">Critical issue alerts</div><div class="s-sub">Show a toast when a scan finds a critical issue</div></div>
+          <div class="switch on" id="alertSwitch" onclick="toggleAlerts()"><div class="knob"></div></div>
+        </div>
+      </div>
+
+      <div class="panel settings-block" style="margin-top:16px;">
+        <div class="panel-head"><h3>Backend connection</h3></div>
+        <div class="s-sub" style="margin-bottom:6px;">API base URL</div>
+        <div class="settings-input-row">
+          <input type="text" id="apiBaseInput" value="http://localhost:8000">
+          <button class="btn btn-ghost" onclick="saveApiBase()">Save</button>
+          <button class="btn btn-ghost" onclick="testConnection()">Test</button>
+        </div>
+        <div style="margin-top:12px; font-size:12.5px; color:var(--text-2);">
+          <span class="conn-dot" id="connDot"></span><span id="connStatus">Not tested yet</span>
+        </div>
+      </div>
+
+      <div class="panel settings-block" style="margin-top:16px;">
+        <div class="panel-head"><h3>Session</h3></div>
+        <button class="btn btn-ghost" onclick="backToLanding()">Log out</button>
+      </div>
+    </section>
+  </main>
+</div>
+</div>
+
+<!-- ================= SCAN DETAIL MODAL ================= -->
+<div id="scanModalOverlay" class="modal-overlay" onclick="if(event.target===this) closeScanModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="scanModalTitle">Scan detail</h3>
+      <button class="icon-btn" onclick="closeScanModal()">✕</button>
+    </div>
+    <div id="scanModalBody" class="modal-body"></div>
+  </div>
+</div>
+
+<div id="toast-stack"></div>
+
+<script>
+/* ---------------- config ---------------- */
+// Point this at your running Tassie backend (see the tassie-backend zip).
+// Persisted so you only have to set it once (Settings -> Backend connection).
+let TASSIE_API_BASE = localStorage.getItem('tassie_api_base') || "http://localhost:8000";
+let alertsEnabled = (localStorage.getItem('tassie_alerts') !== 'off');
+if(localStorage.getItem('tassie_theme') === 'light'){ document.body.classList.add('light'); }
+
+async function apiGet(path){
+  const res = await fetch(`${TASSIE_API_BASE}${path}`);
+  if(!res.ok) throw new Error('Request failed: '+path);
+  return res.json();
+}
+function escapeHtml(str){
+  const d=document.createElement('div'); d.textContent = str ?? ''; return d.innerHTML;
+}
+function formatDate(iso){
+  if(!iso) return '';
+  try{ return new Date(iso).toLocaleString(undefined,{month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}); }
+  catch(e){ return iso; }
+}
+function statusOf(s){
+  const cls = s.risk_score === 0 ? 'clean' : (s.risk_score >= 6 ? 'risk' : 'warn');
+  const label = s.risk_score === 0 ? 'clean' : `${s.findings_count} issue${s.findings_count===1?'':'s'}`;
+  return {cls, label};
+}
+
+/* ---------------- cinematic page load ---------------- */
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    document.getElementById('page-loader').classList.add('hide');
+  }, 380);
+});
+
+/* ---------------- scroll reveal ---------------- */
+const revealObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+
+/* ---------------- landing / login ---------------- */
+function showLogin(){
+  document.getElementById('landing-view').style.display='none';
+  document.getElementById('login-view').style.display='flex';
+}
+function backToLanding(){
+  document.getElementById('app-view').style.display='none';
+  document.getElementById('landing-view').style.display='block';
+  window.scrollTo(0,0);
+}
+let currentRole='Developer';
+function setRole(btn,role){
+  document.querySelectorAll('.role-toggle button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentRole=role;
+}
+
+async function enterApp(){
+  const email = document.querySelector('#login-view input[type=email]').value || 'dev@guardian.ai';
+  const password = document.querySelector('#login-view input[type=password]').value || 'demo-password';
+
+  // Real call to the demo auth endpoint — fails silently into demo mode
+  // if the backend isn't running yet, so the UI never gets stuck.
+  try{
+    const res = await fetch(`${TASSIE_API_BASE}/api/auth/login`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ email, password, role: currentRole })
+    });
+    if(res.ok) await res.json();
+  }catch(e){ /* backend offline — continue in demo mode */ }
+
+  document.getElementById('login-view').style.display='none';
+  document.getElementById('app-view').style.display='block';
+  const displayName = currentRole==='Developer' ? 'Dev Account' : currentRole+' Account';
+  document.getElementById('userRole').textContent = currentRole;
+  document.getElementById('userName').textContent = displayName;
+  document.getElementById('settingsName').textContent = displayName;
+  document.getElementById('settingsEmail').textContent = email;
+  document.getElementById('settingsRole').textContent = currentRole;
+  document.getElementById('apiBaseInput').value = TASSIE_API_BASE;
+  document.getElementById('themeSwitch').classList.toggle('on', !document.body.classList.contains('light'));
+  document.getElementById('alertSwitch').classList.toggle('on', alertsEnabled);
+
+  initCharts();
+  refreshOverview();
+  loadNotifications();
+  setTimeout(()=>fireToast('welcome'),700);
+}
+
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  const isDark = !document.body.classList.contains('light');
+  const sw = document.getElementById('themeSwitch');
+  if(sw) sw.classList.toggle('on', isDark);
+  localStorage.setItem('tassie_theme', isDark ? 'dark' : 'light');
+}
+function toggleAlerts(){
+  alertsEnabled = !alertsEnabled;
+  document.getElementById('alertSwitch').classList.toggle('on', alertsEnabled);
+  localStorage.setItem('tassie_alerts', alertsEnabled ? 'on' : 'off');
+}
+function saveApiBase(){
+  const val = document.getElementById('apiBaseInput').value.trim().replace(/\/+$/,'');
+  if(!val) return;
+  TASSIE_API_BASE = val;
+  localStorage.setItem('tassie_api_base', val);
+  fireToast('welcome', {title:'API base saved', sub: val});
+}
+async function testConnection(){
+  const dot=document.getElementById('connDot');
+  const status=document.getElementById('connStatus');
+  status.textContent='Testing…'; dot.className='conn-dot';
+  try{
+    const res = await fetch(`${TASSIE_API_BASE}/`);
+    if(!res.ok) throw new Error();
+    const data = await res.json();
+    dot.classList.add('ok');
+    status.textContent = `Connected — ${data.status || 'backend reachable'}`;
+  }catch(e){
+    dot.classList.add('fail');
+    status.textContent = `Could not reach ${TASSIE_API_BASE}`;
+  }
+}
+
+/* ---------------- sidebar / view switching ---------------- */
+const VIEW_TITLES = {overview:'Overview', scan:'Scan code', reports:'Reports', history:'History', settings:'Settings'};
+function switchView(view, el){
+  document.querySelectorAll('.view-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  document.querySelectorAll('.side-link').forEach(l=>l.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.getElementById('viewTitle').textContent = VIEW_TITLES[view] || view;
+  if(view==='overview') refreshOverview();
+  if(view==='reports') refreshReports();
+  if(view==='history') refreshHistory();
+}
+
+/* ---------------- charts ---------------- */
+let chartsInit=false;
+let donutChartRef=null;
+let trendChartRef=null;
+
+function initCharts(){
+  if(chartsInit) return; chartsInit=true;
+  const gridColor='rgba(255,255,255,0.06)';
+  const textColor='#9fb0bd';
+  trendChartRef = new Chart(document.getElementById('trendChart'), {
+    type:'line',
+    data:{
+      labels:[],
+      datasets:[{
+        label:'Issues found',
+        data:[],
+        borderColor:'#4fe6d0', backgroundColor:'rgba(79,230,208,0.12)',
+        tension:0.4, fill:true, pointRadius:0, borderWidth:2
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{labels:{color:textColor, font:{family:'Inter', size:11}}}},
+      scales:{
+        x:{grid:{color:gridColor}, ticks:{color:textColor, font:{size:10}}},
+        y:{grid:{color:gridColor}, ticks:{color:textColor, font:{size:10}}, beginAtZero:true}
+      }
+    }
+  });
+
+  donutChartRef = new Chart(document.getElementById('donutChart'), {
+    type:'doughnut',
+    data:{
+      labels:['Critical','High','Medium','Low'],
+      datasets:[{ data:[0,0,0,0], backgroundColor:['#ff5470','#f5a623','#8fe3ff','#4fe6d0'], borderWidth:0 }]
+    },
+    options:{
+      responsive:true, cutout:'68%',
+      plugins:{ legend:{ position:'bottom', labels:{color:textColor, font:{family:'Inter', size:11}, boxWidth:10, padding:14} } }
+    }
+  });
+}
+
+/* ---------------- OVERVIEW: real backend data ---------------- */
+async function refreshOverview(){
+  try{ updateStatCards(await apiGet('/api/stats')); }catch(e){}
+  try{ updateSeverity(await apiGet('/api/stats/severity')); }catch(e){}
+  try{ updateTrendChart(await apiGet('/api/stats/trend?days=14')); }catch(e){}
+  try{
+    renderRecentActivity(await apiGet('/api/history?limit=5'));
+  }catch(e){
+    document.getElementById('recentActivityBody').innerHTML =
+      `<tr><td colspan="4" style="color:var(--text-2); text-align:center; padding:22px;">Can't reach the backend at ${TASSIE_API_BASE}. Make sure uvicorn is running.</td></tr>`;
+  }
+}
+function updateStatCards(stats){
+  document.getElementById('statScans').textContent = stats.total_scans ?? 0;
+  document.getElementById('statOpen').textContent = stats.open_issues ?? 0;
+  document.getElementById('statRisk').textContent = stats.avg_risk ?? 0;
+  document.getElementById('statResolved').textContent = stats.resolved_30d ?? 0;
+}
+function updateSeverity(sev){
+  const counts = { critical: sev.critical||0, high: sev.high||0, medium: sev.medium||0, low: sev.low||0 };
+  const max = Math.max(counts.critical, counts.high, counts.medium, counts.low, 1);
+  ['critical','high','medium','low'].forEach(k=>{
+    const bar=document.getElementById('bar-'+k);
+    const cnt=document.getElementById('cnt-'+k);
+    if(bar) requestAnimationFrame(()=>{ bar.style.width = Math.round((counts[k]/max)*100)+'%'; });
+    if(cnt) cnt.textContent = counts[k];
+  });
+  if(donutChartRef){
+    donutChartRef.data.datasets[0].data=[counts.critical,counts.high,counts.medium,counts.low];
+    donutChartRef.update();
+  }
+}
+function updateTrendChart(trend){
+  if(!trendChartRef || !trend) return;
+  trendChartRef.data.labels = trend.map(t=>t.date);
+  trendChartRef.data.datasets[0].data = trend.map(t=>t.count);
+  trendChartRef.update();
+}
+function renderRecentActivity(history){
+  const tbody = document.getElementById('recentActivityBody');
+  if(!history || !history.length){
+    tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-2); text-align:center; padding:22px;">No scans yet — head to "Scan code" to run your first one.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = history.map(s=>{
+    const {cls, label} = statusOf(s);
+    return `<tr>
+      <td><div class="file-cell">📄 ${escapeHtml(s.filename)}</div></td>
+      <td>${s.risk_score}</td>
+      <td><span class="status-pill ${cls}">${label}</span></td>
+      <td class="row-actions"><button onclick="viewScan(${s.id})">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------------- REPORTS ---------------- */
+async function refreshReports(){
+  const grid=document.getElementById('reportGrid');
+  try{
+    const history = await apiGet('/api/history?limit=100');
+    document.getElementById('reportsCount').textContent = `${history.length} SCAN${history.length===1?'':'S'}`;
+    if(!history.length){
+      grid.innerHTML = '<div style="color:var(--text-2); padding:20px;">No scans yet — run one from "Scan code".</div>';
+      return;
+    }
+    grid.innerHTML = history.map(s=>{
+      const {cls, label} = statusOf(s);
+      return `<div class="report-card">
+        <div class="rc-file">📄 ${escapeHtml(s.filename)}</div>
+        <div class="rc-date">${formatDate(s.created_at)}</div>
+        <div class="rc-row"><span class="status-pill ${cls}">${label}</span><span style="font-family:var(--mono); font-size:12.5px; color:var(--text-1);">Risk ${s.risk_score}</span></div>
+        <div class="rc-actions">
+          <button class="btn btn-ghost" onclick="window.open('${TASSIE_API_BASE}/api/scan/${s.id}/report/pdf','_blank')">PDF</button>
+          <button class="btn btn-ghost" onclick="window.open('${TASSIE_API_BASE}/api/scan/${s.id}/report/excel','_blank')">Excel</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    grid.innerHTML = `<div style="color:var(--text-2); padding:20px;">Can't reach the backend at ${TASSIE_API_BASE}. Make sure uvicorn is running.</div>`;
+  }
+}
+
+/* ---------------- HISTORY ---------------- */
+let allHistory=[];
+async function refreshHistory(){
+  const tbody=document.getElementById('historyTableBody');
+  try{
+    allHistory = await apiGet('/api/history?limit=200');
+    renderHistoryTable();
+  }catch(e){
+    tbody.innerHTML = `<tr><td colspan="5" style="color:var(--text-2); text-align:center; padding:24px;">Can't reach the backend at ${TASSIE_API_BASE}. Make sure uvicorn is running.</td></tr>`;
+  }
+}
+function renderHistoryTable(){
+  const tbody=document.getElementById('historyTableBody');
+  const q=(document.getElementById('historySearch').value||'').toLowerCase();
+  const filter=document.getElementById('historyFilter').value;
+  let rows = allHistory.filter(s=>s.filename.toLowerCase().includes(q));
+  if(filter==='clean') rows = rows.filter(s=>s.risk_score===0);
+  if(filter==='risk') rows = rows.filter(s=>s.risk_score>0);
+  if(!allHistory.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-2); text-align:center; padding:24px;">No scans yet — run one from "Scan code".</td></tr>';
+    return;
+  }
+  if(!rows.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--text-2); text-align:center; padding:24px;">No scans match that search.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(s=>{
+    const {cls, label} = statusOf(s);
+    return `<tr>
+      <td><div class="file-cell">📄 ${escapeHtml(s.filename)}</div></td>
+      <td>${s.risk_score}</td>
+      <td><span class="status-pill ${cls}">${label}</span></td>
+      <td style="font-family:var(--mono); font-size:12px; color:var(--text-2);">${formatDate(s.created_at)}</td>
+      <td class="row-actions"><button onclick="viewScan(${s.id})">View</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---------------- SCAN DETAIL MODAL (with resolve toggles) ---------------- */
+let lastScanId=null;
+async function viewScan(scanId){
+  const overlay = document.getElementById('scanModalOverlay');
+  const body = document.getElementById('scanModalBody');
+  const title = document.getElementById('scanModalTitle');
+  overlay.classList.add('open');
+  title.textContent = 'Loading…';
+  body.innerHTML = '<div style="padding:20px; color:var(--text-2);">Fetching scan details…</div>';
+  try{
+    const scan = await apiGet(`/api/scan/${scanId}`);
+    lastScanId = scan.id;
+    title.textContent = `${scan.filename} — Risk ${scan.risk_score}/10`;
+    const exportRow = `<div class="export-row" style="margin-bottom:16px;">
+      <button class="btn btn-ghost" onclick="window.open('${TASSIE_API_BASE}/api/scan/${scan.id}/report/pdf','_blank')">Export PDF</button>
+      <button class="btn btn-ghost" onclick="window.open('${TASSIE_API_BASE}/api/scan/${scan.id}/report/excel','_blank')">Export Excel</button>
+    </div>`;
+    if(!scan.findings || !scan.findings.length){
+      body.innerHTML = exportRow + '<div style="padding:0 0 20px; color:var(--text-1);">No issues found — this file is clean. ✅</div>';
+      return;
+    }
+    body.innerHTML = exportRow + scan.findings.map((f,idx)=>findingCardHtml(scan.id, idx, f)).join('');
+  }catch(e){
+    title.textContent = 'Error';
+    body.innerHTML = `<div style="padding:20px; color:var(--danger);">Could not load this scan. Make sure the backend is running at ${TASSIE_API_BASE}.</div>`;
+  }
+}
+function findingCardHtml(scanId, idx, f){
+  const resolved = !!f.resolved;
+  return `<div class="finding-card ${resolved?'resolved':''}" id="finding-${scanId}-${idx}">
+    <div class="finding-top">
+      <span class="status-pill ${f.severity==='critical'||f.severity==='high'?'risk':'warn'}">${f.severity}</span>
+      <span class="f-meta">line ${f.line_number} · ${escapeHtml(f.category)}</span>
+      <button class="resolve-btn ${resolved?'is-resolved':''}" onclick="toggleResolve(${scanId},${idx},this)">${resolved?'✓ Resolved':'Mark resolved'}</button>
+    </div>
+    <div class="finding-explain">${escapeHtml(f.ai_explanation || f.message || '')}</div>
+  </div>`;
+}
+async function toggleResolve(scanId, idx, btn){
+  const card = document.getElementById(`finding-${scanId}-${idx}`);
+  const nowResolved = !card.classList.contains('resolved');
+  try{
+    const res = await fetch(`${TASSIE_API_BASE}/api/scan/${scanId}/finding/${idx}/resolve`, {
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ resolved: nowResolved })
+    });
+    if(!res.ok) throw new Error('failed');
+    card.classList.toggle('resolved', nowResolved);
+    btn.classList.toggle('is-resolved', nowResolved);
+    btn.textContent = nowResolved ? '✓ Resolved' : 'Mark resolved';
+    refreshOverview();
+    loadNotifications();
+  }catch(e){
+    fireToast('warn', {title:'Could not update', sub:`Check that the backend is running at ${TASSIE_API_BASE}.`});
+  }
+}
+function closeScanModal(){
+  document.getElementById('scanModalOverlay').classList.remove('open');
+}
+
+/* ---------------- SCAN CODE page ---------------- */
+function setScanTab(tab){
+  document.getElementById('tabFile').classList.toggle('active', tab==='file');
+  document.getElementById('tabPaste').classList.toggle('active', tab==='paste');
+  document.getElementById('scanFilePane').style.display = tab==='file' ? 'block' : 'none';
+  document.getElementById('scanPastePane').style.display = tab==='paste' ? 'block' : 'none';
+}
+
+const dz=document.getElementById('dropzone');
+['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault(); dz.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault(); dz.classList.remove('drag');}));
+dz.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files[0];
+  if(f) scanRealFile(f);
+});
+document.getElementById('fileInput').addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(f) scanRealFile(f);
+});
+
+function readFileAsText(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+async function scanRealFile(file){
+  const codeText = await readFileAsText(file);
+  runScan(file.name, codeText);
+}
+function scanPastedCode(){
+  const filename = document.getElementById('pasteFilename').value.trim() || 'pasted_code.py';
+  const code = document.getElementById('pasteCode').value;
+  if(!code.trim()){ fireToast('warn', {title:'Nothing to scan', sub:'Paste some code first.'}); return; }
+  runScan(filename, code);
+}
+
+async function runScan(filename, codeText){
+  const wrap=document.getElementById('progressWrap');
+  const fill=document.getElementById('progressFill');
+  const text=document.getElementById('progressText');
+  const pct=document.getElementById('progressPct');
+  wrap.style.display='block';
+  fill.style.width='0%';
+  let p=0;
+  const steps=['Parsing file…','Running static analysis…','Cross-checking patterns…','Generating explanation…'];
+  const interval=setInterval(()=>{
+    p+=Math.random()*14+6;
+    if(p>=92){ p=92; clearInterval(interval); }
+    text.textContent=steps[Math.floor(p/26)%steps.length];
+    fill.style.width=p+'%';
+    pct.textContent=Math.floor(p)+'%';
+  },300);
+
+  let explanation=null, findings=[], ok=false;
+  try{
+    const res = await fetch(`${TASSIE_API_BASE}/api/scan`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ filename, code: codeText })
+    });
+    if(res.ok){
+      const data = await res.json();
+      lastScanId = data.scan_id;
+      findings = data.findings || [];
+      ok = true;
+      explanation = findings.length
+        ? findings.map((f,i)=>`${i+1}. [${f.severity.toUpperCase()}] ${f.category} (line ${f.line_number}): ${f.ai_explanation}`).join('\n\n')
+        : "No issues found in this file — nice and clean!";
+    }
+  }catch(e){
+    explanation = `Could not reach the Tassie backend at ${TASSIE_API_BASE}. Make sure uvicorn is still running.`;
+  }
+
+  clearInterval(interval);
+  fill.style.width='100%'; pct.textContent='100%'; text.textContent = ok ? 'Scan complete' : 'Scan failed';
+  runAIExplanation(explanation);
+
+  if(ok){
+    const crit = findings.find(f=>(f.severity||'').toLowerCase()==='critical');
+    if(crit && alertsEnabled){
+      fireToast('critical', {title:'Critical issue found', sub:`${crit.category} in ${filename}`});
+    } else {
+      fireToast('scan', {title:'Scan complete', sub:`${findings.length} issue${findings.length===1?'':'s'} found in ${filename}`});
+    }
+    refreshOverview();
+    loadNotifications();
+  }
+}
+
+function runAIExplanation(liveExplanation){
+  const panel=document.getElementById('aiPanel');
+  const msg=document.getElementById('aiMsg');
+  panel.style.display='block';
+  msg.innerHTML='<span class="cursor"></span>';
+  const full = liveExplanation || "No explanation available.";
+  let i=0;
+  const type=setInterval(()=>{
+    msg.innerHTML = full.slice(0,i).replace(/\n/g,'<br>') + '<span class="cursor"></span>';
+    i++;
+    if(i>full.length){ clearInterval(type); }
+  },10);
+}
+function exportReport(kind){
+  if(!lastScanId){ fireToast('warn', {title:'Nothing to export yet', sub:'Run a scan first.'}); return; }
+  window.open(`${TASSIE_API_BASE}/api/scan/${lastScanId}/report/${kind==='pdf'?'pdf':'excel'}`, '_blank');
+}
+
+/* ---------------- notifications dropdown ---------------- */
+function toggleNotifPanel(e){
+  e.stopPropagation();
+  const panel=document.getElementById('notifPanel');
+  const willOpen = !panel.classList.contains('open');
+  panel.classList.toggle('open', willOpen);
+  if(willOpen) loadNotifications();
+}
+document.addEventListener('click', ()=>{
+  document.getElementById('notifPanel')?.classList.remove('open');
+});
+async function loadNotifications(){
+  const panel=document.getElementById('notifPanel');
+  const dot=document.getElementById('notifDot');
+  try{
+    const items = await apiGet('/api/findings/open?limit=6');
+    if(!items.length){
+      panel.innerHTML = '<div class="notif-empty">No open critical or high issues. 🎉</div>';
+      dot.style.display='none';
+      return;
+    }
+    dot.style.display='block';
+    panel.innerHTML = items.map(it=>`
+      <div class="notif-item" onclick="closeNotifAndView(${it.scan_id})">
+        <div class="n-top"><span>${escapeHtml(it.category)}</span><span class="status-pill ${it.severity==='critical'?'risk':'warn'}">${it.severity}</span></div>
+        <div class="n-sub">${escapeHtml(it.filename)} · line ${it.line_number}</div>
+      </div>`).join('');
+  }catch(e){
+    panel.innerHTML = `<div class="notif-empty">Can't reach the backend.</div>`;
+    dot.style.display='none';
+  }
+}
+function closeNotifAndView(scanId){
+  document.getElementById('notifPanel').classList.remove('open');
+  viewScan(scanId);
+}
+
+/* ---------------- toasts ---------------- */
+function fireToast(kind, custom){
+  const stack=document.getElementById('toast-stack');
+  const el=document.createElement('div');
+  const map={
+    welcome:{title:'Welcome back', sub:'Your workspace is up to date.', danger:false},
+    scan:{title:'Scan complete', sub:'', danger:false},
+    critical:{title:'Critical issue found', sub:'', danger:true},
+    warn:{title:'Heads up', sub:'', danger:true},
+    pdf:{title:'PDF report exported', sub:'Your report is ready to download', danger:false},
+    xlsx:{title:'Excel report exported', sub:'Your report is ready to download', danger:false}
+  };
+  const base = map[kind] || map.welcome;
+  const d = custom ? Object.assign({}, base, custom) : base;
+  el.className='toast'+(d.danger?' danger':'');
+  el.innerHTML=`<div>${d.danger?'⚠️':'✅'}</div><div><div class="t-title">${d.title}</div><div class="t-sub">${d.sub}</div></div>`;
+  stack.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .4s ease'; setTimeout(()=>el.remove(),400); }, 4200);
+}
+
+/* landing page code-flag reveal loop sync (visual only, CSS handles timing via animation) */
+</script>
+</body>
+</html>

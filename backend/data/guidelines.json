@@ -1,0 +1,42 @@
+[
+  {
+    "id": "G-SQLI",
+    "category": "SQL Injection",
+    "text": "Always use parameterized queries or an ORM (such as SQLAlchemy) instead of building SQL strings with concatenation or f-strings. Never trust user input directly inside a query."
+  },
+  {
+    "id": "G-SECRET",
+    "category": "Hardcoded Secret",
+    "text": "Store credentials in environment variables or a secrets manager (such as AWS Secrets Manager or HashiCorp Vault). Never commit API keys or passwords into source control."
+  },
+  {
+    "id": "G-XSS",
+    "category": "Cross-Site Scripting",
+    "text": "Avoid writing untrusted data into innerHTML. Use textContent, or sanitize input with a library such as DOMPurify before rendering it as HTML."
+  },
+  {
+    "id": "G-CRYPTO",
+    "category": "Weak Cryptography",
+    "text": "Use modern hashing algorithms such as SHA-256 or bcrypt/argon2 for passwords. MD5 and SHA1 are broken and should never be used for security purposes."
+  },
+  {
+    "id": "G-EVAL",
+    "category": "Dangerous Eval",
+    "text": "Avoid eval() and exec() on any input that could be influenced by a user. Use safer alternatives like ast.literal_eval for parsing simple data."
+  },
+  {
+    "id": "G-DESER",
+    "category": "Insecure Deserialization",
+    "text": "Never unpickle data from an untrusted source. Prefer safe serialization formats like JSON for data exchange."
+  },
+  {
+    "id": "G-AUTH",
+    "category": "Weak Authentication",
+    "text": "Never compare plaintext passwords. Hash passwords with bcrypt or argon2 and compare hashes using constant-time comparison functions."
+  },
+  {
+    "id": "G-DEBUG",
+    "category": "Debug Mode Enabled",
+    "text": "Disable debug mode in any production deployment. Debug pages can expose stack traces, environment variables, and internal file paths to attackers."
+  }
+]
